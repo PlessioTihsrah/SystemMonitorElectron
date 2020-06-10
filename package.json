@@ -1,0 +1,32 @@
+{
+  "name": "SystemMonitor",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "author": "Harshit Pal",
+  "description": "A desktop app to monitor your device remotely",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "electron .",
+    "format": "prettier --write \"src/**/*.js\"",
+    "build-win" : "electron-builder --win --ia32",
+    "build-linux": "electron-builder --linux"
+  },
+  "devDependencies": {
+    "electron": "^7.3.0",
+    "electron-builder": "^22.7.0"
+  },
+  "dependencies": {
+    "crypto-js": "^4.0.0",
+    "express": "^4.17.1",
+    "firebase": "^7.15.0",
+    "getmac": "^5.5.0",
+    "helmet": "^3.22.0",
+    "ngrok": "^3.2.7",
+    "socket.io": "^2.3.0",
+    "systeminformation": "^4.26.5"
+  },
+  "build": {
+    "appId": "com.plessiotihsrah.sysmonitor"
+  }
+}

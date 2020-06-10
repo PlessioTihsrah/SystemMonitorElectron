@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>System Monitor</title>
+    <link rel="stylesheet" href="bootstrap.min.css" />
+  </head>
+  <body>
+    <div class="container mt-5" id="container"></div>
+  </body>
+  <script src="./login_page.js"></script>
+  <script src="./control_page.js"></script>
+  <script>
+    const { ipcRenderer } = require("electron");
+    let runningServer = false;
+    const container = document.getElementById("container");
+    let user;
+    ipcRenderer.send("send:userInfo");
+    ipcRenderer.on("userInfo", (target, userInfo) => {
+      if (userInfo) {
+        user = { email: userInfo.email, emailVerified: userInfo.emailVerified };
+      } else {
+        user = userInfo;
+      }
+      showPages();
+    });
+    ipcRenderer.on("error", (target, errorCode) => {
+      if (
+        errorCode === "auth/user-not-found" ||
+        errorCode === "auth/wrong-password"
+      ) {
+        document.getElementById("message").innerText = "Invalid Credentials";
+      } else if (errorCode === "auth/weak-password") {
+        document.getElementById("message").innerText =
+          "Min Password length should be 6";
+      } else if (errorCode === "auth/email-already-in-use") {
+        document.getElementById("message").innerText = "Email already taken";
+      } else {
+        document.getElementById("message").innerText = errorCode;
+      }
+      toggleSpinner(false);
+    });
+
+    ipcRenderer.on("created:server", () => {
+      runningServer = true;
+      showControlPage();
+      toggleSpinner();
+    });
+
+    ipcRenderer.on("stopped:server", () => {
+      runningServer = false;
+      showControlPage();
+      toggleSpinner();
+    });
+
+    function showPages() {
+      if (!user) {
+        showLoginPage();
+      } else {
+        showControlPage();
+      }
+    }
+    showPages();
+  </script>
+</html>

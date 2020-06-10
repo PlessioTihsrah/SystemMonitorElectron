@@ -1,0 +1,5 @@
+node_modules
+firebaseConfig.js
+.idea/*
+dist/*
+yarn.lock

@@ -6,38 +6,42 @@ const firebaseApp = require("./firebaseConfig");
 let mainWindow;
 let tray;
 let server;
-
-app.on("ready", function () {
-  mainWindow = new BrowserWindow({
-    width: 250,
-    height: 330,
-    frame: false,
-    resizable: false,
-    show: false,
-    webPreferences: {
-      nodeIntegration: true,
-      backgroundThrottling: false,
-    },
-    alwaysOnTop: true,
-    skipTaskbar: true,
+const gotTheLock = app.requestSingleInstanceLock()
+if(!gotTheLock){
+  app.quit()
+} else {
+  app.on("ready", function () {
+    mainWindow = new BrowserWindow({
+      width: 250,
+      height: 330,
+      frame: false,
+      resizable: false,
+      show: false,
+      webPreferences: {
+        nodeIntegration: true,
+        backgroundThrottling: false,
+      },
+      alwaysOnTop: true,
+      skipTaskbar: true,
+    });
+    mainWindow.loadFile("./html/index.html");
+    mainWindow.on("blur", () => mainWindow.hide());
+    tray = new AppTray(mainWindow);
+    server = new Server(tray, firebaseApp);
+    mainWindow.removeMenu();
+    firebaseApp.auth().onAuthStateChanged(function (user) {
+      mainWindow.webContents.send("userInfo", user);
+    });
   });
-  mainWindow.loadFile("./html/index.html");
-  mainWindow.on("blur", () => mainWindow.hide());
-  tray = new AppTray(mainWindow);
-  server = new Server(tray, firebaseApp);
-  mainWindow.removeMenu();
-  firebaseApp.auth().onAuthStateChanged(function (user) {
-    mainWindow.webContents.send("userInfo", user);
+  app.on("before-quit", async (event) => {
+    if (server.runnning) {
+      event.preventDefault();
+      await server.stopServer();
+      app.quit();
+    }
   });
-});
+}
 
-app.on("before-quit", async (event) => {
-  if (server.runnning) {
-    event.preventDefault();
-    await server.stopServer();
-    app.quit();
-  }
-});
 
 ipcMain.on("send:userInfo", () => {
   const user = firebaseApp.auth().currentUser;

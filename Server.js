@@ -34,7 +34,7 @@ class Server {
         this.server = app.listen();
         this.port = this.server.address().port;
         this.io = socketio(this.server);
-        this.io.origins(["https://sys-monitor.now.sh:443"]);
+        // this.io.origins(["https://sys-monitor.now.sh:443"]);
         this.url = await ngrok.connect({
           addr: this.port,
           binPath: path => path.replace("app.asar", "app.asar.unpacked"),
